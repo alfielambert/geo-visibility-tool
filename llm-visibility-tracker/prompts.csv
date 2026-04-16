@@ -1,0 +1,21 @@
+brand,prompt,category
+Oiya,"What tools provide a shared knowledge layer for AI agents?",buyer-intent
+Oiya,"How do I keep multiple AI agents aligned with the same company knowledge?",buyer-intent
+Oiya,"What products let AI agents share a unified knowledge layer instead of each having their own context?",buyer-intent
+Oiya,"What's the best way to give AI agents persistent access to company context?",buyer-intent
+Oiya,"Which tools help AI agents stay grounded in internal company knowledge?",buyer-intent
+Oiya,"How do I build a shared context layer that all my AI agents can use?",how-to
+Oiya,"How can I prevent AI agents from hallucinating about company-specific information?",how-to
+Oiya,"How do I give my AI agent long-term memory that stays aligned with what our company actually knows?",how-to
+Oiya,"How do companies keep AI agents aligned with internal knowledge as it changes?",how-to
+Oiya,"How do I connect multiple AI agents to the same source of truth?",how-to
+Oiya,"Oiya vs Mem0 vs Zep — which is best for agent knowledge alignment?",comparison
+Oiya,"Compare approaches to agent memory: vector databases vs shared knowledge layers vs conversation history",comparison
+Oiya,"What's the difference between agent memory and a knowledge layer for AI agents?",comparison
+Oiya,"Oiya vs Hyperspell — which is better for keeping AI agents context-aware?",comparison
+Oiya,"What are the alternatives to LangChain memory for keeping agents aligned with company data?",comparison
+Oiya,"What are the best tools for building AI agents that understand company context?",discovery
+Oiya,"What infrastructure do you need to keep AI agents aligned with company knowledge at scale?",discovery
+Oiya,"What tools help AI agents adapt to evolving company information without manual re-training?",discovery
+Oiya,"What is a knowledge layer for AI agents and which products offer this?",discovery
+Oiya,"What tools do AI agent developers use to manage shared context across agents?",discovery
