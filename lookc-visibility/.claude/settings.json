@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "oiya-visibility": {
+      "command": "npx",
+      "args": ["tsx", "mcp-server/index.ts"],
+      "env": {
+        "OIYA_API_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
