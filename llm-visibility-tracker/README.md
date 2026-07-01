@@ -39,6 +39,11 @@ python run.py --dry-run           # Preview prompts, no API calls
 python run.py --report            # Regenerate report from existing data
 python run.py --brand Oiya        # Only run prompts for a specific brand
 python run.py --category comparison  # Only run a specific category
+
+# Diagnostic layer (opt-in, adds LLM calls ~$0.05–0.15 extra)
+python run.py --diagnose          # After prompts, analyze each gap with LLM
+python run.py --audit             # Run AEO site audit against oiya.ai
+python run.py --diagnose --audit  # Both together
 ```
 
 ## Customising Prompts
@@ -65,6 +70,27 @@ The script is a single CLI command with exit code 0 on success:
 #   Command: cd /path/to/llm-visibility-tracker && python run.py
 ```
 
+## Diagnostic Layer
+
+When you run `--diagnose`, GEOYA identifies every prompt where Oiya was missed but competitors were cited, then calls an LLM to explain why — per model. The report gains two new sections:
+
+- **Why We Missed** — per-gap analysis with competitor advantage, content gap, and recommended action
+- **Model-Specific Patterns** — how GPT-4o vs Claude Sonnet differ in citation behaviour towards Oiya
+
+When you run `--audit`, GEOYA fetches oiya.ai and checks five AEO signals:
+
+| Check | What it looks for |
+|-------|-------------------|
+| Entity clarity | Does the homepage define Oiya's category in the first 200 words? |
+| Comparison pages | Does `/vs/<competitor>` exist for each tracked competitor? |
+| Citation signals | Are there authority statements LLMs would cite? |
+| Competitor naming | Are competitor names used on the site? |
+| Social signals | How many HN + Reddit results exist for Oiya vs competitors? |
+
+## Configuring Oiya's Assets
+
+Edit `oiya_assets.json` to update known pages, social profiles, and tracked competitors. The site audit and diagnostic analyzer both read this file.
+
 ## Files
 
 | File | Purpose |
@@ -74,10 +100,18 @@ The script is a single CLI command with exit code 0 on success:
 | `brand_detection.py` | Analyses responses for mentions & sentiment |
 | `results_logger.py` | Appends results to CSV |
 | `report.py` | Generates markdown dashboard |
+| `diagnostic_analyzer.py` | Explains why Oiya was missed (per LLM) |
+| `content_recommender.py` | Aggregates diagnostics into ranked content bets |
+| `site_audit.py` | Lightweight AEO audit of oiya.ai |
+| `oiya_assets.json` | Oiya's pages, competitors, value prop config |
 | `prompts.csv` | Your prompt library (edit this) |
 | `results.csv` | Raw results (auto-generated, append-only) |
 | `latest_report.md` | Summary dashboard (auto-generated) |
 
 ## Cost Estimate
 
-Each full run with 20 prompts × 2 models = 40 API calls. At roughly ~800 tokens per response, that's about $0.10–0.20 per run depending on current pricing.
+| Mode | API calls | Estimated cost |
+|------|-----------|----------------|
+| Default run (20 prompts × 2 models) | 40 | $0.10–0.20 |
+| `--diagnose` (per gap, uses gpt-4o-mini) | 5–15 extra | $0.05–0.15 extra |
+| `--audit` | 0 (scraping only) | Free |

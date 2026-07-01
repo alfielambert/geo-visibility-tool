@@ -6,11 +6,15 @@ from collections import Counter, defaultdict
 from datetime import date
 
 from results_logger import load_all_results
+from content_recommender import aggregate_recommendations, generate_content_brief, summarize_by_model
 
 REPORT_FILE = "latest_report.md"
 
 
-def generate_report():
+def generate_report(
+    diagnostics: list[dict] | None = None,
+    audit_results: dict | None = None,
+):
     """Generate a markdown summary report from all historical results."""
     rows = load_all_results()
     if not rows:
@@ -126,10 +130,76 @@ def generate_report():
 
     # ---- Priority actions ----
     lines.append("## Priority Actions\n")
-    actions = _generate_actions(brands, current, comp_counter)
-    for i, action in enumerate(actions, 1):
-        lines.append(f"{i}. {action}")
+    if diagnostics:
+        recs = aggregate_recommendations(diagnostics)
+        for i, rec in enumerate(recs, 1):
+            lines.append(generate_content_brief(f"{i}. {rec['title']}", rec))
+    else:
+        actions = _generate_actions(brands, current, comp_counter)
+        for i, action in enumerate(actions, 1):
+            lines.append(f"{i}. {action}")
     lines.append("")
+
+    # ---- Why We Missed (diagnostic analysis) ----
+    if diagnostics:
+        lines.append("## Why We Missed\n")
+        lines.append(
+            "Diagnostic analysis of prompts where competitors were cited but Oiya was not.\n"
+        )
+
+        # Per-model summary
+        model_summaries = summarize_by_model(diagnostics)
+        if model_summaries:
+            lines.append("### Model-Specific Patterns\n")
+            for model, summary in model_summaries.items():
+                lines.append(f"**{model}:** {summary}\n")
+
+        # Per-gap detail
+        lines.append("### Gap Details\n")
+        for d in diagnostics:
+            comps = ", ".join(d["competitors_mentioned"])
+            lines.append(
+                f"**[{d['model']}] \"{d['prompt'][:80]}\"**\n\n"
+                f"- Competitors cited: {comps}\n"
+                f"- Why they won: {d['diagnosis']}\n"
+                f"- Content gap: {d['content_gap']}\n"
+                f"- Recommended action: {d['recommended_action']}\n"
+                f"- Priority: {d['priority'].upper()} · Confidence: {d['confidence']:.0%}\n"
+            )
+            if d.get("model_bias"):
+                lines.append(f"- Model bias: {d['model_bias']}\n")
+            lines.append("")
+
+    # ---- Site Audit ----
+    if audit_results and "error" not in audit_results:
+        lines.append("## Site Audit\n")
+        overall = audit_results.get("overall_audit_score", 0)
+        lines.append(f"**Overall AEO Score: {overall:.0%}**\n")
+
+        checks = {
+            "entity_clarity": "Entity Clarity",
+            "comparison_pages": "Comparison Pages",
+            "citation_signals": "Citation Signals",
+            "competitor_naming": "Competitor Naming",
+            "social_signals": "Social Signals",
+        }
+
+        lines.append("| Check | Score | Finding |")
+        lines.append("|-------|-------|---------|")
+        for key, label in checks.items():
+            check = audit_results.get(key, {})
+            score = check.get("score", 0)
+            finding = check.get("finding", "—")
+            bar = "🟢" if score >= 0.6 else ("🟡" if score >= 0.3 else "🔴")
+            lines.append(f"| {label} | {bar} {score:.0%} | {finding} |")
+        lines.append("")
+
+        recs = audit_results.get("recommendations", [])
+        if recs:
+            lines.append("### Audit Recommendations\n")
+            for i, rec in enumerate(recs, 1):
+                lines.append(f"{i}. {rec}")
+            lines.append("")
 
     # ---- Run stats ----
     lines.append("---\n")

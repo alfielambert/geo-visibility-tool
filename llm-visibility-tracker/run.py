@@ -21,6 +21,8 @@ from llm_runner import run_prompt
 from brand_detection import detect_brand
 from results_logger import log_result
 from report import generate_report
+from diagnostic_analyzer import analyze_gaps
+from site_audit import run_audit
 
 PROMPTS_FILE = "prompts.csv"
 
@@ -52,6 +54,14 @@ def main():
     parser.add_argument(
         "--category", type=str, default=None,
         help="Only run prompts for a specific category",
+    )
+    parser.add_argument(
+        "--diagnose", action="store_true",
+        help="After running prompts, analyze gaps with LLM diagnostics",
+    )
+    parser.add_argument(
+        "--audit", action="store_true",
+        help="Run AEO site audit against oiya.ai",
     )
     args = parser.parse_args()
 
@@ -99,6 +109,7 @@ def main():
     # Run all prompts
     total = len(prompts) * len(models_available)
     done = 0
+    gap_items: list[dict] = []
 
     for i, p in enumerate(prompts, 1):
         brand = p["brand"]
@@ -127,10 +138,33 @@ def main():
             comps = f" | comps: {', '.join(detection['competitors_mentioned'][:3])}" if detection["competitors_mentioned"] else ""
             print(f"       {status} {resp['model']}{pos}{comps}")
 
+            # Collect gaps for optional diagnostic analysis
+            if args.diagnose and not detection["brand_mentioned"] and detection["competitors_mentioned"]:
+                gap_items.append({
+                    "prompt": prompt,
+                    "category": category,
+                    "model": resp["model"],
+                    "competitors_mentioned": detection["competitors_mentioned"],
+                    "response": resp["response"],
+                })
+
     print(f"\n✅ Done — {done} results logged to results.csv")
 
+    # Optional diagnostics
+    diagnostics: list[dict] = []
+    if args.diagnose:
+        if gap_items:
+            diagnostics = analyze_gaps(gap_items)
+        else:
+            print("\n✅ No gaps to diagnose — brand appeared in all responses.")
+
+    # Optional site audit
+    audit_results: dict | None = None
+    if args.audit:
+        audit_results = run_audit()
+
     # Generate report
-    generate_report()
+    generate_report(diagnostics=diagnostics or None, audit_results=audit_results)
 
 
 if __name__ == "__main__":

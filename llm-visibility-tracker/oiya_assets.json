@@ -1,0 +1,16 @@
+{
+  "homepage": "https://oiya.ai",
+  "pages": [
+    {"url": "https://oiya.ai/docs", "topic": "documentation"},
+    {"url": "https://oiya.ai/pricing", "topic": "pricing"}
+  ],
+  "social": {
+    "linkedin": "https://linkedin.com/company/oiya",
+    "reddit": null,
+    "medium": null,
+    "github": "https://github.com/lookc/oiya",
+    "twitter": null
+  },
+  "value_prop": "A living, self-updating knowledge layer for AI agents. Structured content that compounds over time.",
+  "target_competitors": ["Mem0", "Zep", "Hyperspell", "Egregore", "LangChain"]
+}
