@@ -85,7 +85,11 @@ When you run `--audit`, GEOYA fetches oiya.ai and checks five AEO signals:
 | Comparison pages | Does `/vs/<competitor>` exist for each tracked competitor? |
 | Citation signals | Are there authority statements LLMs would cite? |
 | Competitor naming | Are competitor names used on the site? |
-| Social signals | How many HN + Reddit results exist for Oiya vs competitors? |
+| 'Best X' listicles | Are there "best X for Y" pages LLMs cite for discovery queries? |
+| Category coverage | Does the site have content for each prompt category (buyer-intent, how-to, comparison, discovery)? |
+| Social signals | HN + Reddit + LinkedIn post counts for Oiya vs top competitor |
+
+LinkedIn social signals require a Lix API key — add `LIX_API_KEY=your_key` to `.env`. Without it, HN and Reddit are still checked. Get a key at [lix-it.com](https://lix-it.com).
 
 ## Configuring Oiya's Assets
 

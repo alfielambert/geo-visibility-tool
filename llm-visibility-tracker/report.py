@@ -181,6 +181,8 @@ def generate_report(
             "comparison_pages": "Comparison Pages",
             "citation_signals": "Citation Signals",
             "competitor_naming": "Competitor Naming",
+            "bestx_listicles": "'Best X' Listicles",
+            "category_coverage": "Category Coverage",
             "social_signals": "Social Signals",
         }
 
