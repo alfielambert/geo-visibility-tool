@@ -168,6 +168,18 @@ const statements = [
     updated_at TEXT NOT NULL
   )`,
 
+  `CREATE TABLE IF NOT EXISTS site_pages (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL REFERENCES projects(id),
+    url TEXT NOT NULL,
+    title TEXT,
+    meta_description TEXT,
+    source TEXT NOT NULL DEFAULT 'manual',
+    indexed_at TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )`,
+
   `CREATE TABLE IF NOT EXISTS scores (
     id TEXT PRIMARY KEY,
     project_id TEXT NOT NULL REFERENCES projects(id),
@@ -180,10 +192,30 @@ const statements = [
   )`,
 ];
 
+// Additive ALTER TABLE statements — safe to re-run (errors are ignored)
+const alterStatements = [
+  `ALTER TABLE content_opportunities ADD COLUMN action TEXT NOT NULL DEFAULT 'create'`,
+  `ALTER TABLE content_opportunities ADD COLUMN matched_page_url TEXT`,
+  `ALTER TABLE content_opportunities ADD COLUMN matched_page_title TEXT`,
+  `ALTER TABLE content_opportunities ADD COLUMN matched_page_reason TEXT`,
+];
+
 console.log("🗄️  Running migrations...\n");
 for (const stmt of statements) {
   const tableName = stmt.match(/CREATE TABLE IF NOT EXISTS (\w+)/)?.[1];
   await client.execute(stmt);
   console.log(`  ✅ ${tableName}`);
 }
+
+console.log("\n🔧 Applying column additions (idempotent)...");
+for (const stmt of alterStatements) {
+  const col = stmt.match(/ADD COLUMN (\w+)/)?.[1];
+  try {
+    await client.execute(stmt);
+    console.log(`  ✅ added ${col}`);
+  } catch {
+    console.log(`  ⏭️  ${col} already exists`);
+  }
+}
+
 console.log("\n🎉 Migration complete!");

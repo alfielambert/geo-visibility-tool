@@ -35,12 +35,18 @@ interface Evidence {
   redditCitationRate?: number;
 }
 
+type CoverageAction = "create" | "refresh" | "expand" | "reposition";
+
 interface Recommendation {
   id: string;
   title: string;
   summary: string;
   opportunityType: string;
   recommendedPageType: string;
+  action: CoverageAction;
+  matchedPageUrl: string | null;
+  matchedPageTitle: string | null;
+  matchedPageReason: string | null;
   priorityScore: number;
   confidenceScore: number;
   status: string;
@@ -76,6 +82,16 @@ export default function RecommendationsPage() {
     if (score >= 0.7) return "High Priority";
     if (score >= 0.5) return "Medium Priority";
     return "Low Priority";
+  };
+
+  const actionBadge = (action: CoverageAction) => {
+    const map: Record<CoverageAction, { label: string; className: string }> = {
+      create: { label: "Create new page", className: "bg-blue-950/40 text-blue-300 border-blue-900/50" },
+      refresh: { label: "Refresh existing", className: "bg-yellow-950/40 text-yellow-300 border-yellow-900/50" },
+      expand: { label: "Expand existing", className: "bg-purple-950/40 text-purple-300 border-purple-900/50" },
+      reposition: { label: "Reposition existing", className: "bg-rose-950/40 text-rose-300 border-rose-900/50" },
+    };
+    return map[action] ?? map.create;
   };
 
   if (loading) {
@@ -143,6 +159,9 @@ export default function RecommendationsPage() {
                           Reddit
                         </span>
                       )}
+                      <span className={`text-xs px-2 py-0.5 rounded border ${actionBadge(rec.action ?? "create").className}`}>
+                        {actionBadge(rec.action ?? "create").label}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-slate-500">
@@ -320,12 +339,39 @@ export default function RecommendationsPage() {
                       </section>
                     )}
 
+                    {/* Existing page notice (when action is not "create") */}
+                    {rec.action && rec.action !== "create" && rec.matchedPageUrl && (
+                      <section className="p-4 bg-yellow-950/20 border border-yellow-900/40 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <ExternalLink className="w-4 h-4 text-yellow-400 mt-0.5 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-yellow-300 uppercase tracking-wide mb-1">
+                              Existing page found — {actionBadge(rec.action).label}
+                            </p>
+                            <p className="text-sm text-slate-300 mb-2">
+                              {rec.matchedPageReason ?? `An existing page at this URL already covers this intent.`}
+                            </p>
+                            <a
+                              href={rec.matchedPageUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs text-yellow-300 hover:text-yellow-200 font-mono"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {rec.matchedPageTitle ?? rec.matchedPageUrl}
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+
                     {/* Content brief */}
                     <section className="p-4 bg-slate-800/40 border border-slate-700/50 rounded-lg">
                       <div className="flex items-center gap-2 mb-3">
                         <Target className="w-4 h-4 text-green-400" />
                         <h4 className="text-xs font-semibold text-green-400 uppercase tracking-wide">
-                          Content brief
+                          {rec.action && rec.action !== "create" ? "Update brief" : "Content brief"}
                         </h4>
                       </div>
                       <div className="space-y-3 text-sm">

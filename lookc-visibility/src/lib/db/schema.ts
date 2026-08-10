@@ -251,6 +251,21 @@ export const detectedThemes = sqliteTable("detected_themes", {
     .$defaultFn(() => new Date().toISOString()),
 });
 
+// ─── Site Pages (indexed page inventory for cannibalisation checks) ──
+
+export const sitePages = sqliteTable("site_pages", {
+  id: uuid(),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id),
+  url: text("url").notNull(),
+  title: text("title"),
+  metaDescription: text("meta_description"),
+  source: text("source").notNull().default("manual"), // manual | sitemap
+  indexedAt: text("indexed_at"),
+  ...timestamps,
+});
+
 // ─── Content Opportunities ───────────────────────────────────────────
 
 export const contentOpportunities = sqliteTable("content_opportunities", {
@@ -264,6 +279,11 @@ export const contentOpportunities = sqliteTable("content_opportunities", {
   summary: text("summary").notNull(),
   opportunityType: text("opportunity_type").notNull(),
   recommendedPageType: text("recommended_page_type").notNull(),
+  // create | refresh | expand | reposition (set after checking site inventory)
+  action: text("action").notNull().default("create"),
+  matchedPageUrl: text("matched_page_url"),
+  matchedPageTitle: text("matched_page_title"),
+  matchedPageReason: text("matched_page_reason"),
   priorityScore: real("priority_score").notNull(),
   confidenceScore: real("confidence_score").notNull(),
   supportingEvidenceJson: text("supporting_evidence_json").notNull(),

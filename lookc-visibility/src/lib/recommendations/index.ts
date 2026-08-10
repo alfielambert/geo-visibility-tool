@@ -11,6 +11,7 @@ import { db, schema } from "../db";
 import { eq } from "drizzle-orm";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
+import { checkPageCoverage } from "../site-inventory";
 import { opportunityScore, finalPromptScore } from "../scoring";
 import type { MentionStrength } from "../types/enums";
 
@@ -282,8 +283,17 @@ export async function generateRecommendations(
   // Generate narratives and persist
   let count = 0;
   for (const group of grouped) {
-    const narrative = await generateNarrative(group);
-    await persistRecommendation(projectId, runId, group, narrative);
+    const [narrative, coverage] = await Promise.all([
+      generateNarrative(group),
+      checkPageCoverage(
+        projectId,
+        group.clusterKey,
+        group.candidates.map((c) => c.promptText),
+        group.dominantThemes,
+        group.missingThemes
+      ),
+    ]);
+    await persistRecommendation(projectId, runId, group, narrative, coverage);
     count++;
   }
 
@@ -485,7 +495,8 @@ async function persistRecommendation(
   projectId: string,
   runId: string,
   group: GroupedRecommendation,
-  narrative: string
+  narrative: string,
+  coverage: { action: string; matchedPageUrl: string | null; matchedPageTitle: string | null; reason: string }
 ): Promise<void> {
   const now = new Date().toISOString();
 
@@ -523,6 +534,10 @@ async function persistRecommendation(
         ? "reddit_presence"
         : "content_gap",
     recommendedPageType: group.recommendedPageType,
+    action: coverage.action,
+    matchedPageUrl: coverage.matchedPageUrl,
+    matchedPageTitle: coverage.matchedPageTitle,
+    matchedPageReason: coverage.reason,
     priorityScore: group.priorityScore,
     confidenceScore: group.avgConfidence,
     supportingEvidenceJson: JSON.stringify(evidence),
