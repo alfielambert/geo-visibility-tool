@@ -28,6 +28,3 @@ venv/
 # Archives
 *.zip
 
-# Tracker outputs
-llm-visibility-tracker/results.csv
-llm-visibility-tracker/latest_report.md

@@ -1,6 +1,0 @@
-.env
-results.csv
-latest_report.md
-__pycache__/
-*.pyc
-.venv/

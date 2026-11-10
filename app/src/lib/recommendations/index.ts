@@ -101,6 +101,12 @@ export async function generateRecommendations(
 
   if (observations.length === 0) return 0;
 
+  const project = await db.query.projects.findFirst({
+    where: eq(schema.projects.id, projectId),
+  });
+  if (!project) throw new Error(`Project ${projectId} not found`);
+  const brandName = project.brandName;
+
   // Get prompts and clusters for context
   const prompts = await db.query.prompts.findMany({
     where: eq(schema.prompts.projectId, projectId),
@@ -284,7 +290,7 @@ export async function generateRecommendations(
   let count = 0;
   for (const group of grouped) {
     const [narrative, coverage] = await Promise.all([
-      generateNarrative(group),
+      generateNarrative(group, brandName),
       checkPageCoverage(
         projectId,
         group.clusterKey,
@@ -399,12 +405,13 @@ function groupCandidates(
  * Generate an LLM-assisted narrative for a grouped recommendation.
  */
 async function generateNarrative(
-  group: GroupedRecommendation
+  group: GroupedRecommendation,
+  brandName: string
 ): Promise<string> {
   const openRouterKey = process.env.OPENROUTER_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   if (!openRouterKey && !anthropicKey) {
-    return buildFallbackNarrative(group);
+    return buildFallbackNarrative(group, brandName);
   }
 
   const promptTexts = group.candidates
@@ -421,7 +428,7 @@ async function generateNarrative(
       ? `\n- IMPORTANT: The recommended channel is Reddit thread presence (not owned blog/page content). The evidence shows AI models are pulling recommendations from Reddit for this cluster. Recommend getting mentioned in relevant Reddit threads and subreddit discussions, not just creating owned content.`
       : "";
 
-  const prompt = `You are writing a recommendation for the Oiya marketing team. Based on the evidence below, write a 2-3 sentence recommendation for content they should create or conversations they should participate in.
+  const prompt = `You are writing a recommendation for the ${brandName} marketing team. Based on the evidence below, write a 2-3 sentence recommendation for content they should create or conversations they should participate in.
 
 ## Evidence
 - Cluster: ${group.clusterKey.replace(/_/g, " ")}
@@ -429,7 +436,7 @@ async function generateNarrative(
 - Top competitor average score: ${(group.avgTopCompetitorScore * 100).toFixed(1)}%
 - Top competitors appearing: ${group.topCompetitors.join(", ")}
 - Dominant themes in AI responses: ${group.dominantThemes.join(", ") || "none detected"}
-- Themes missing from Oiya's presence: ${group.missingThemes.join(", ") || "none detected"}
+- Themes missing from ${brandName}'s presence: ${group.missingThemes.join(", ") || "none detected"}
 - Cited domains: ${group.citedDomains.join(", ") || "none"}
 - Recommended channel: ${group.recommendedPageType.replace(/_/g, " ")}${redditContext}${pageTypeGuidance}
 
@@ -458,7 +465,7 @@ Write the recommendation summary only. No headers or bullet points.`;
         max_tokens: 512,
         messages: [{ role: "user", content: prompt }],
       });
-      return response.choices[0]?.message?.content ?? buildFallbackNarrative(group);
+      return response.choices[0]?.message?.content ?? buildFallbackNarrative(group, brandName);
     } else {
       const client = new Anthropic({ apiKey: anthropicKey! });
       const response = await client.messages.create({
@@ -472,20 +479,20 @@ Write the recommendation summary only. No headers or bullet points.`;
         .join("");
     }
   } catch {
-    return buildFallbackNarrative(group);
+    return buildFallbackNarrative(group, brandName);
   }
 }
 
-function buildFallbackNarrative(group: GroupedRecommendation): string {
+function buildFallbackNarrative(group: GroupedRecommendation, brandName: string): string {
   const cluster = group.clusterKey.replace(/_/g, " ");
   const competitors = group.topCompetitors.slice(0, 3).join(", ");
 
   if (group.recommendedPageType === "reddit_thread") {
     const pct = (group.redditCitationRate * 100).toFixed(0);
-    return `Oiya has low visibility (${(group.avgBrandScore * 100).toFixed(0)}%) in the "${cluster}" cluster, where ${competitors} dominate. ${pct}% of AI citations in this cluster come from Reddit threads — AI models heavily source product recommendations from Reddit. Consider participating in relevant Reddit discussions about ${group.missingThemes.slice(0, 2).join(" and ") || "key topics in this category"} with authentic, helpful responses that mention Oiya's strengths.`;
+    return `${brandName} has low visibility (${(group.avgBrandScore * 100).toFixed(0)}%) in the "${cluster}" cluster, where ${competitors} dominate. ${pct}% of AI citations in this cluster come from Reddit threads — AI models heavily source product recommendations from Reddit. Consider participating in relevant Reddit discussions about ${group.missingThemes.slice(0, 2).join(" and ") || "key topics in this category"} with authentic, helpful responses that mention ${brandName}'s strengths.`;
   }
 
-  return `Oiya has low visibility (${(group.avgBrandScore * 100).toFixed(0)}%) in the "${cluster}" cluster, where ${competitors} dominate. Consider creating a ${group.recommendedPageType.replace(/_/g, " ")} addressing ${group.missingThemes.slice(0, 2).join(" and ") || "key themes in this category"}.`;
+  return `${brandName} has low visibility (${(group.avgBrandScore * 100).toFixed(0)}%) in the "${cluster}" cluster, where ${competitors} dominate. Consider creating a ${group.recommendedPageType.replace(/_/g, " ")} addressing ${group.missingThemes.slice(0, 2).join(" and ") || "key themes in this category"}.`;
 }
 
 /**

@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" width="960" height="360" role="img" aria-labelledby="t d">
+  <title id="t">How the GEO Visibility Tool works</title>
+  <desc id="d">Buyer prompts grouped into clusters run against GPT-4o and Claude. A parser extracts whether the brand was mentioned, its position, strength and citations. A deterministic formula scores visibility per prompt and cluster. The recommendation engine checks your sitemap and suggests whether to create, refresh, expand or reposition a page, or join a Reddit thread. Results appear in a dashboard and an MCP server.</desc>
+  <style>
+    .bg { fill: #ffffff; }
+    .box { fill: #f7f6fb; stroke: #c9c3dd; stroke-width: 1.5; }
+    .core { fill: #f1edfb; stroke: #6b4fd8; stroke-width: 2; }
+    .files { fill: #fff6ef; stroke: #ff8a50; stroke-width: 1.5; }
+    .title { font: 600 16px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #1d1b26; }
+    .label { font: 500 14px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #1d1b26; }
+    .small { font: 400 12.5px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #5c5870; }
+    .mono { font: 400 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #5c5870; }
+    .line { stroke: #8f88a8; stroke-width: 1.5; fill: none; }
+    .head { fill: #8f88a8; }
+    .chip { fill: #ffffff; stroke: #c9c3dd; stroke-width: 1; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0d1117; }
+      .box { fill: #161b22; stroke: #3a3550; }
+      .core { fill: #1d1833; stroke: #9d86ff; }
+      .files { fill: #241a14; stroke: #ff8a50; }
+      .title, .label { fill: #e8e6f0; }
+      .small, .mono { fill: #a5a1b8; }
+      .line { stroke: #6e6888; }
+      .head { fill: #6e6888; }
+      .chip { fill: #0d1117; stroke: #3a3550; }
+    }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path class="head" d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="960" height="360" rx="12"/>
+
+  <!-- Prompts -->
+  <text class="small" x="30" y="44">What buyers ask</text>
+  <rect class="box" x="30" y="58" width="150" height="222" rx="12"/>
+  <text class="title" x="48" y="90">Prompts</text>
+  <text class="small" x="48" y="110">grouped by intent</text>
+  <text class="mono" x="48" y="150">"best tools for X"</text>
+  <text class="mono" x="48" y="174">"how do I Y"</text>
+  <text class="mono" x="48" y="198">"you vs them"</text>
+
+  <path class="line" d="M182,169 L208,169" marker-end="url(#arrow)"/>
+
+  <!-- Engines -->
+  <text class="small" x="210" y="44">AI answers</text>
+  <rect class="box" x="210" y="58" width="140" height="102" rx="10"/>
+  <text class="label" x="226" y="86">GPT-4o</text>
+  <text class="mono" x="226" y="106">via OpenRouter</text>
+  <rect class="box" x="210" y="178" width="140" height="102" rx="10"/>
+  <text class="label" x="226" y="206">Claude</text>
+  <text class="mono" x="226" y="226">via OpenRouter</text>
+
+  <path class="line" d="M352,109 L360,109 C370,109 370,158 378,158" marker-end="url(#arrow)"/>
+  <path class="line" d="M352,229 L360,229 C370,229 370,180 378,180" marker-end="url(#arrow)"/>
+
+  <!-- Core -->
+  <rect class="core" x="380" y="58" width="226" height="222" rx="12"/>
+  <text class="title" x="400" y="90">Parse and score</text>
+  <text class="small" x="400" y="110">the formula has no model in it</text>
+  <rect class="chip" x="400" y="124" width="186" height="44" rx="8"/>
+  <text class="label" x="414" y="143">Mentioned?</text>
+  <text class="small" x="414" y="160">position and strength</text>
+  <rect class="chip" x="400" y="174" width="186" height="44" rx="8"/>
+  <text class="label" x="414" y="193">Cited?</text>
+  <text class="small" x="414" y="210">your URL vs competitors</text>
+  <rect class="chip" x="400" y="224" width="186" height="44" rx="8"/>
+  <text class="label" x="414" y="243">Trend</text>
+  <text class="small" x="414" y="260">delta against last run</text>
+
+  <path class="line" d="M608,169 L634,169" marker-end="url(#arrow)"/>
+
+  <!-- Recommendations -->
+  <text class="small" x="636" y="44">What to do next</text>
+  <rect class="files" x="636" y="58" width="150" height="222" rx="12"/>
+  <text class="title" x="652" y="90">Next actions</text>
+  <text class="small" x="652" y="110">sitemap-aware</text>
+  <text class="mono" x="652" y="150">create page</text>
+  <text class="mono" x="652" y="174">refresh page</text>
+  <text class="mono" x="652" y="198">expand page</text>
+  <text class="mono" x="652" y="222">reposition page</text>
+  <text class="mono" x="652" y="246">join Reddit thread</text>
+
+  <path class="line" d="M788,140 L796,140 C806,140 806,89 814,89" marker-end="url(#arrow)"/>
+  <path class="line" d="M788,198 L796,198 C806,198 806,249 814,249" marker-end="url(#arrow)"/>
+
+  <!-- Outputs -->
+  <text class="small" x="816" y="44">Where it shows up</text>
+  <rect class="box" x="816" y="58" width="124" height="62" rx="10"/>
+  <text class="label" x="832" y="86">Dashboard</text>
+  <text class="mono" x="832" y="106">Next.js</text>
+  <rect class="box" x="816" y="218" width="124" height="62" rx="10"/>
+  <text class="label" x="832" y="246">MCP server</text>
+  <text class="mono" x="832" y="266">for agents</text>
+
+  <text class="small" x="30" y="336">Traditional SEO measures clicks. This measures whether AI models mention, recommend or cite you.</text>
+</svg>
