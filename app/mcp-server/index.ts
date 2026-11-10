@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Oiya AI Visibility — MCP Server
+ * GEO Visibility Tool: MCP Server
  *
  * Exposes the visibility tool's API as MCP tools so Claude Code agents
  * can trigger runs, check scores, and get recommendations programmatically.
@@ -12,7 +12,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-const BASE_URL = process.env.OIYA_API_URL ?? "http://localhost:3000";
+const BASE_URL = process.env.VISIBILITY_API_URL ?? "http://localhost:3000";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -56,7 +56,7 @@ function fmtScore(value: number | null | undefined): string {
 // ---------------------------------------------------------------------------
 
 const server = new McpServer({
-  name: "oiya-visibility",
+  name: "geo-visibility",
   version: "1.0.0",
 });
 
@@ -481,7 +481,7 @@ server.tool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error(`Oiya Visibility MCP server running (API: ${BASE_URL})`);
+  console.error(`GEO Visibility MCP server running (API: ${BASE_URL})`);
 }
 
 main().catch((err) => {

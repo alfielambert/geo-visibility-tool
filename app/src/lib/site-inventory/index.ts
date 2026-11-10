@@ -39,7 +39,7 @@ export interface CoverageResult {
  */
 export async function fetchSitemap(sitemapUrl: string): Promise<SitePage[]> {
   const res = await fetch(sitemapUrl, {
-    headers: { "User-Agent": "Oiya-GEO-Bot/1.0" },
+    headers: { "User-Agent": "GEO-Visibility-Bot/1.0" },
     signal: AbortSignal.timeout(15_000),
   });
 

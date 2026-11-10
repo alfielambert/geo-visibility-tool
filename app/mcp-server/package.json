@@ -1,8 +1,8 @@
 {
-  "name": "oiya-visibility-mcp",
+  "name": "geo-visibility-mcp",
   "version": "1.0.0",
   "private": true,
-  "description": "MCP server for Oiya AI Visibility Tool",
+  "description": "MCP server for the GEO Visibility Tool",
   "type": "module",
   "scripts": {
     "start": "npx tsx index.ts"

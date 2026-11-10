@@ -1,8 +1,8 @@
 {
-  "name": "lookc-visibility",
+  "name": "geo-visibility-tool",
   "version": "0.1.0",
   "private": true,
-  "description": "LookC AI Visibility & Recommendation Tool",
+  "description": "Track and improve brand visibility in AI-generated answers",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
